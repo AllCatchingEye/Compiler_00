@@ -1,0 +1,23 @@
+decl n, a, b, t;
+
+n := 100;
+
+if (n = 0) {
+  return 0;
+} else {
+  if (n = 1) {
+    return 1;
+  }
+  else { skip; };
+};
+
+a := 1;
+b := 1;
+while (n > 2) {
+  t := a;
+  a := b;
+  b := b + t;
+  n := n - 1;
+};
+
+return b;

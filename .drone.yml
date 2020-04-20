@@ -1,0 +1,10 @@
+kind: pipeline
+type: docker
+name: default
+
+steps:
+  - name: build and test
+    image: obraun/haskell-ci
+    commands:
+      - stack build
+      - stack test

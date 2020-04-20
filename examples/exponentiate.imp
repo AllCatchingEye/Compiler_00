@@ -1,0 +1,18 @@
+decl x, y, n;
+
+x :=2;
+n:= 1023;
+
+if(n < 0
+) { return 0;
+} else
+{
+  if(n = 0) { return 1; } else { skip; };
+};
+
+y := x;
+while (n > 1) {
+  y := y * x;
+  n := n - 1;
+};
+return y;
