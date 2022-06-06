@@ -67,7 +67,7 @@ data Statement = StmtSkip                       -- skip / no-op
 
 
 -- | Der Programmzustand entspricht den momentanen Werten der deklarierten
--- Variablen zusammen mit einem optionalen Rückgabewert.
+-- Variabl en zusammen mit einem optionalen Rückgabewert.
 data ProgramState = ProgramState
   { getMemory :: Map VarName Integer
   , result    :: Maybe Integer}
