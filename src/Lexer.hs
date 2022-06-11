@@ -58,7 +58,7 @@ langDef = emptyDef {
                                         -- Bezeichners, das nicht das erste
                                         -- Zeichen ist
 
-  , Tok.reservedNames = ["decl", "if", "else", "while", "return", "skip", "assign"]       -- definieren Sie hier eine Liste von
+  , Tok.reservedNames = ["decl", "if", "else", "while", "return", "skip", ":=", "then", "tt", "ff", "not"]       -- definieren Sie hier eine Liste von
                                         -- keywords als strings
 
   , Tok.reservedOpNames = ["+", "-", "*", "/", "%", "||", "&&", "^", "<", "<=", ">", ">=", "=", ":="]     

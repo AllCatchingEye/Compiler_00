@@ -20,15 +20,13 @@ import           Types
 --    | `/`
 --    | `%`
 
--- Mit Vorrang der Operatoren:
-
--- Result -> AExpr
+-- Mit Vorrang der Operatoren und ohne Linkrekursion:
 
 -- AExpr -> Term AExpr'
 
 -- AExpr' -> + Term AExpr'
---        | - Term AExpr'
---        | ε
+-- AExpr'  | - Term AExpr'
+--         | ε
 
 -- Term -> Factor Term'
 
@@ -47,66 +45,58 @@ import           Types
 -- | Der Parser für arithmetische Ausdrücke. Dies ist der Einstiegspunkt für das
 -- Parsen für Ergebnisse des Typs `AExpr`
 
-result :: Parser AExpr
-result = 
-  do 
-    aExpr
-
 aExpr :: Parser AExpr
 aExpr = 
   do
     t <- term 
-    expr <- aExpr'
-    pure read ((show f : show t)::AExpr)
+    aExpr' t
     
-aExpr' :: Parser AExpr
-aExpr' = 
+aExpr' :: AExpr -> Parser AExpr
+aExpr' t1 = 
   do
     op <- reservedOp "+"
-    t <- term
-    expr <- aExpr'
-    pure (AExprPlus t expr)
+    t2 <- term
+    expr <- aExpr' t2
+    pure (AExprPlus t1 expr)
   <|>
   do
     op <- reservedOp "-"
-    t <- term
-    expr <- aExpr'
-    pure (AExprMinus t expr)
+    t2 <- term
+    expr <- aExpr' t2
+    pure (AExprMinus t1 expr)
   <|>
   do
-    e <- string ""
-    pure (AExprVar (VarName e))
+    pure t1
 
 term :: Parser AExpr
 term = 
   do 
     f <- factor 
-    t <- term'
-    pure read ((show f : show t)::AExpr)
+    term' f
 
-term' :: Parser AExpr
-term' =
+
+term' :: AExpr -> Parser AExpr
+term' f1 =
   do
     op <- reservedOp "/"
-    f <- factor 
-    t <- term'
-    pure (AExprDiv f t)
+    f2 <- factor
+    expr <- term' f2
+    pure (AExprDiv f1 expr)
   <|>
   do
     op <- reservedOp "*"
-    f <- factor 
-    t <- term'
-    pure (AExprMult f t)
+    f2 <- factor
+    expr <- term' f2
+    pure (AExprMult f1 expr)
   <|>
   do
     op <- reservedOp "%"
-    f <- factor 
-    t <- term'
-    pure (AExprMod f t)
+    f2 <- factor
+    expr <- term' f2
+    pure (AExprMod f1 expr)
   <|>
   do
-    e <- string ""
-    pure (AExprVar (VarName e))
+    pure f1
 
 factor :: Parser AExpr
 factor = 
@@ -114,7 +104,7 @@ factor =
     _ <- char '('
     expr <- aExpr
     _ <- char ')'
-    parenthesesAround (pure expr)
+    parenthesesAround expr
   <|>
   do 
     name <- identifier

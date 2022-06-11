@@ -17,7 +17,12 @@ import           Types
 --       | AExpr CmpOp AExpr
 --       | `(` BExpr `)`
 
--- Return -> BExpr
+-- BExpr → `tt`
+--       | `ff`
+--       | `not` BExpr
+
+
+-- Nach entfernen der mehrdeutigkeit
 
 -- BExpr -> Term BExpr'
 
@@ -34,6 +39,7 @@ import           Types
 --         | ff
 --         | not BExpr
 --         | cmpExpr
+--         | `(` BExpr `)`
 
 -- cmpExpr -> AExpr > AExpr
 --         | AExpr < AExpr
@@ -49,47 +55,38 @@ import           Types
 
 -- | Dieser Parser ist der Einstiegspunkt für das Parsen von logischen Ausdrücken.
 
-return :: Parser BExpr
-return = do bExpr
-
 bExpr :: Parser BExpr
 bExpr = 
   do
     t <- term
-    epxr <- BExpr'
-    pure (t : expr)
+    bExpr' t
 
-bExpr' :: Parser BExpr
-bExpr' = 
+bExpr' :: BExpr -> Parser BExpr
+bExpr' t1 = 
   do 
     bOP  <- reservedOp "||"
-    t <- term
-    expr <- bExpr'
-    pure (BExprOr t expr)
+    t2 <- term
+    pure (BExprOr t1 (bExpr' t2))
   <|>
   do
     bOP <- reservedOp "^"
-    t <- term
-    expr <- bExpr'
-    pure (BExprXor t expr)
+    t2 <- term
+    pure (BExprXor t1 (bExpr' t2))
   do 
-    _ <- bExpr'
-    pure (AExprVar (VarName ""))
+    pure t1
 
 term :: Parser BExpr
 term = 
   do
     b <- boolean
-    t <- term'
-    pure (b : t)
+    term' b
 
 term' :: Parser BExpr
-term' = 
+term' b1 = 
   do 
     bOP <- reservedOp "&&"
-    b <- boolean
-    t <- term'
-    pure (BExprAnd b t)
+    b2 <- boolean
+    pure (BExprAnd b1 (term' b2))
 
 -- TODO
 boolean :: Parser BExpr
@@ -108,13 +105,18 @@ boolean =
     pure (BExprNot expr)
   <|>
   do
+    _ <- char '('
+    expr <- bExpr
+    _ <- char ')'
+    parenthesesAround expr
+  <|>
+  do
     expr <- cmpExpr
     pure expr
 
 cmpExpr :: Parser BExpr
 cmpExpr = 
   try do
-    do
     op <- reservedOp "<="
     pure (BExprLTE aExpr aExpr)
   <|>
