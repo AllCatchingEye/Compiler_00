@@ -61,7 +61,7 @@ langDef = emptyDef {
   , Tok.reservedNames = ["decl", "if", "else", "while", "return", "skip", ":=", "then", "tt", "ff", "not"]       -- definieren Sie hier eine Liste von
                                         -- keywords als strings
 
-  , Tok.reservedOpNames = ["+", "-", "*", "/", "%", "||", "&&", "^", "<", "<=", ">", ">=", "=", ":="]     
+  , Tok.reservedOpNames = ["+", "-", "*", "/", "%", "||", "&&", "^", "<", "<=", ">", ">=", "="]     
                                         -- definieren Sie hier eine Liste von
                                         -- Operatoren als strings
   }
