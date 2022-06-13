@@ -73,7 +73,7 @@ statement' first =
   try (do
     sec <- statement
     next <- statement' sec
-    pure StmtSeq first next)
+    pure StmtSeq {first = first, next = next})
   <|>
   do
     pure first
@@ -86,7 +86,7 @@ ifStatement =
     stmt1 <- bracesAround statement
     _ <- reserved "else"
     stmt2 <- bracesAround statement
-    pure StmtIf expr stmt1 stmt2
+    pure StmtIf {ifCondition = expr, thenCase = stmt1, elsecase = stmt2}
 
 whileStatement :: Parser Statement
 whileStatement = 
@@ -94,7 +94,7 @@ whileStatement =
     _ <- reserved "while"
     expr <- parenthesesAround bExpr
     stm <- bracesAround statement
-    pure StmtWhile expr stm
+    pure StmtWhile {loopCondition = expr, loopBody = stm}
 
 skipStatement :: Parser Statement
 skipStatement = 
@@ -107,7 +107,7 @@ returnStatement =
   do
     _ <- reserved "return"
     expr <- aExpr 
-    pure StmtReturn expr
+    pure StmtReturn {resultValue = expr}
 
 assignStatement :: Parser Statement
 assignStatement =
@@ -115,4 +115,4 @@ assignStatement =
     name <- identifier
     _ <- reserved ":="
     expr <- aExpr
-    pure StmtAssign name expr
+    pure StmtAssign {lhs = VarName name, rhs = expr}
