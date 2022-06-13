@@ -101,10 +101,8 @@ term' f1 =
 factor :: Parser AExpr
 factor = 
   do
-    _ <- char '('
-    expr <- aExpr
-    _ <- char ')'
-    parenthesesAround expr
+    expr <- parenthesesAround aExpr
+    pure expr
   <|>
   do 
     name <- identifier

@@ -70,40 +70,30 @@ statement =
 
 statement' :: Statement -> Parser Statement
 statement' first =
-  try do
+  try (do
     sec <- statement
     next <- statement' sec
-    pure StmtSeq first next
+    pure StmtSeq first next)
   <|>
   do
-    pure stmnt1
+    pure first
 
 ifStatement :: Parser Statement
 ifStatement = 
   do
     _ <- reserved "if"
-    _ <- char '('
-    expr <- bExpr
-    _ <- char ')'
-    _ <- char '{'
-    stmt1 <- statement
-    _ <- char '}'
-    _ reserved "else"
-    _ <- char '{'
-    stmt2 <- statement
-    _ <- char '}'
+    expr <- parenthesesAround bExpr
+    stmt1 <- bracesAround statement
+    _ <- reserved "else"
+    stmt2 <- bracesAround statement
     pure StmtIf expr stmt1 stmt2
 
 whileStatement :: Parser Statement
 whileStatement = 
   do
     _ <- reserved "while"
-    _ <- char '('
-    expr <- bExpr
-    _ <- char ')'
-    _ <- char '{'
-    stm <- statement
-    _ <- char '}'
+    expr <- parenthesesAround bExpr
+    stm <- bracesAround statement
     pure StmtWhile expr stm
 
 skipStatement :: Parser Statement

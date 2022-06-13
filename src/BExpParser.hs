@@ -66,12 +66,15 @@ bExpr' t1 =
   do 
     bOP  <- reservedOp "||"
     t2 <- term
-    pure (BExprOr t1 (bExpr' t2))
+    expr <- bExpr' t2
+    pure (BExprOr t1 expr)
   <|>
   do
     bOP <- reservedOp "^"
     t2 <- term
-    pure (BExprXor t1 (bExpr' t2))
+    expr <- bExpr' t2
+    pure (BExprXor t1 expr)
+  <|>
   do 
     pure t1
 
@@ -81,12 +84,13 @@ term =
     b <- boolean
     term' b
 
-term' :: Parser BExpr
+term' :: BExpr -> Parser BExpr
 term' b1 = 
   do 
     bOP <- reservedOp "&&"
     b2 <- boolean
-    pure (BExprAnd b1 (term' b2))
+    expr <- term' b2
+    pure (BExprAnd b1 expr)
 
 -- TODO
 boolean :: Parser BExpr
@@ -105,10 +109,8 @@ boolean =
     pure (BExprNot expr)
   <|>
   do
-    _ <- char '('
-    expr <- bExpr
-    _ <- char ')'
-    parenthesesAround expr
+    expr <- parenthesesAround bExpr
+    pure expr
   <|>
   do
     expr <- cmpExpr
@@ -116,22 +118,32 @@ boolean =
 
 cmpExpr :: Parser BExpr
 cmpExpr = 
-  try do
+  try (do
+    expr1 <- aExpr
     op <- reservedOp "<="
-    pure (BExprLTE aExpr aExpr)
+    expr2 <- aExpr
+    pure (BExprLTE expr1 expr2))
   <|>
   do
+    expr1 <- aExpr
     op <- reservedOp "<"
-    pure (BExprLT aExpr aExpr)
+    expr2 <- aExpr
+    pure (BExprLT expr1 expr2)
   <|>
-  try do
+  try (do
+    expr1 <- aExpr
     op <- reservedOp ">="
-    pure (BExprGTE aExpr aExpr)
+    expr2 <- aExpr
+    pure (BExprGTE expr1 expr2))
   <|>
   do
+    expr1 <- aExpr
     op <- reservedOp ">"
-    pure (BExprGT aExpr aExpr)
+    expr2 <- aExpr
+    pure (BExprGT expr1 expr2)
   <|>
   do
+    expr1 <- aExpr
     op <- reservedOp "="
-    pure (BExprEq aExpr aExpr)
+    expr2 <- aExpr
+    pure (BExprEq expr1 expr2)
