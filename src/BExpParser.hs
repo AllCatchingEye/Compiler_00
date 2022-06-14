@@ -91,16 +91,21 @@ term' b1 =
     b2 <- boolean
     expr <- term' b2
     pure (BExprAnd b1 expr)
+  <|>
+  do
+    pure b1
 
 -- TODO
 boolean :: Parser BExpr
 boolean =
   do
     tt <- string "tt"
+    _ <- whiteSpace
     pure (BExprBool True)
   <|>
   do
     ff <- string "ff"
+     _ <- whiteSpace
     pure (BExprBool False)
   <|>
   do
@@ -120,30 +125,30 @@ cmpExpr :: Parser BExpr
 cmpExpr = 
   try (do
     expr1 <- aExpr
-    op <- reservedOp "<="
+    _ <- reservedOp "<="
     expr2 <- aExpr
     pure (BExprLTE expr1 expr2))
   <|>
   do
     expr1 <- aExpr
-    op <- reservedOp "<"
+    _ <- reservedOp "<"
     expr2 <- aExpr
     pure (BExprLT expr1 expr2)
   <|>
   try (do
     expr1 <- aExpr
-    op <- reservedOp ">="
+    _ <- reservedOp ">="
     expr2 <- aExpr
     pure (BExprGTE expr1 expr2))
   <|>
   do
     expr1 <- aExpr
-    op <- reservedOp ">"
+    _ <- reservedOp ">"
     expr2 <- aExpr
     pure (BExprGT expr1 expr2)
   <|>
   do
     expr1 <- aExpr
-    op <- reservedOp "="
+    _ <- reservedOp "="
     expr2 <- aExpr
     pure (BExprEq expr1 expr2)

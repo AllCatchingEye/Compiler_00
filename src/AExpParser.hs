@@ -48,6 +48,7 @@ import           Types
 aExpr :: Parser AExpr
 aExpr = 
   do
+    _ <- whiteSpace
     t <- term 
     aExpr' t
     
