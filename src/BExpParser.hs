@@ -105,7 +105,7 @@ boolean =
   <|>
   do
     ff <- string "ff"
-     _ <- whiteSpace
+    _ <- whiteSpace
     pure (BExprBool False)
   <|>
   do
