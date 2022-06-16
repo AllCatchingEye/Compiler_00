@@ -19,4 +19,23 @@ parseProgram s = parse (program <* eof) "" s
 -- | Diese Funktion ist der Parser für ein `Program` und dient sozusagen als
 -- Startsymbol der Grammatik.
 program :: Parser Program
-program = error "program parser not yet implemented"
+program = 
+  do
+    _ <- whiteSpace
+    do
+      _ <- reserved "decl"
+      variables <- many (try (do
+                  name <- identifier
+                  _ <- optionMaybe (char ',')
+                  _ <- whiteSpace
+                  pure (VarName name)))
+      _ <- semi
+      stmt <- statement
+      pure Program {declaration = variables, statements = stmt}
+    <|>
+    do
+      stmt <- statement
+      pure Program {declaration = [], statements = stmt}
+
+
+   

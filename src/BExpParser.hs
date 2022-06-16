@@ -125,27 +125,27 @@ cmpExpr :: Parser BExpr
 cmpExpr = 
   try (do
     expr1 <- aExpr
-    _ <- reservedOp "<="
-    expr2 <- aExpr
-    pure (BExprLTE expr1 expr2))
-  <|>
-  do
-    expr1 <- aExpr
-    _ <- reservedOp "<"
-    expr2 <- aExpr
-    pure (BExprLT expr1 expr2)
-  <|>
-  try (do
-    expr1 <- aExpr
     _ <- reservedOp ">="
     expr2 <- aExpr
     pure (BExprGTE expr1 expr2))
   <|>
-  do
+  try (do
     expr1 <- aExpr
     _ <- reservedOp ">"
     expr2 <- aExpr
-    pure (BExprGT expr1 expr2)
+    pure (BExprGT expr1 expr2))
+  <|>
+  try (do
+    expr1 <- aExpr
+    _ <- reservedOp "<="
+    expr2 <- aExpr
+    pure (BExprLTE expr1 expr2))
+  <|>
+  try (do
+    expr1 <- aExpr
+    _ <- reservedOp "<"
+    expr2 <- aExpr
+    pure (BExprLT expr1 expr2))
   <|>
   do
     expr1 <- aExpr

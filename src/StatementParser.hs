@@ -43,25 +43,25 @@ import           Text.ParserCombinators.Parsec
 -- rekursiv wieder ein `statement`.
 statement :: Parser Statement
 statement = 
-  do
+  try (do
     stmnt <- ifStatement
     _ <- semi
-    statement' stmnt
+    statement' stmnt)
   <|>
-  do
+  try (do
     stmnt <- whileStatement
     _ <- semi
-    statement' stmnt
+    statement' stmnt)
   <|>
-  do
+  try (do
     stmnt <- skipStatement
     _ <- semi
-    statement' stmnt
+    statement' stmnt)
   <|>
-  do
+  try (do
     stmnt <- returnStatement
     _ <- semi
-    statement' stmnt
+    statement' stmnt)
   <|>
   do
     stmnt <- assignStatement
@@ -81,6 +81,7 @@ statement' first =
 ifStatement :: Parser Statement
 ifStatement = 
   do
+    _ <- whiteSpace
     _ <- reserved "if"
     expr <- parenthesesAround bExpr
     stmt1 <- bracesAround statement
@@ -91,6 +92,7 @@ ifStatement =
 whileStatement :: Parser Statement
 whileStatement = 
   do
+    _ <- whiteSpace
     _ <- reserved "while"
     expr <- parenthesesAround bExpr
     stm <- bracesAround statement
@@ -99,12 +101,14 @@ whileStatement =
 skipStatement :: Parser Statement
 skipStatement = 
   do
+    _ <- whiteSpace
     _ <- reserved "skip"
     pure StmtSkip
 
 returnStatement :: Parser Statement
 returnStatement =
   do
+    _ <- whiteSpace
     _ <- reserved "return"
     expr <- aExpr 
     pure StmtReturn {resultValue = expr}
@@ -112,7 +116,8 @@ returnStatement =
 assignStatement :: Parser Statement
 assignStatement =
   do
+    _ <- whiteSpace
     name <- identifier
-    _ <- reserved ":="
+    _ <- reservedOp ":="
     expr <- aExpr
     pure StmtAssign {lhs = VarName name, rhs = expr}
