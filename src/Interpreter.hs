@@ -44,12 +44,14 @@ interpretStatement ps@(ProgramState memory result) s =
 interpretStmt :: ProgramState -> Statement -> ProgramState
 interpretStmt ps s =
   case s of
-    StmtSkip -> _
-    StmtAssign vn ae -> _
-    StmtSeq state state' -> _
-    StmtIf be state state' -> _
+    StmtSkip -> ps
+    StmtAssign vn ae -> case updateVar ps vn (interpretAexpr ps ae) of
+      Nothing -> _
+      Just ps' -> _
+    StmtSeq first next -> _
+    StmtIf be th el -> _
     StmtWhile be state -> _
-    StmtReturn ae -> _
+    StmtReturn ae -> (interpretAexpr ps ae)
 
 -- | Diese Funktion interpretiert einen logischen Ausdruck.
 interpretBexpr :: ProgramState -> BExpr -> Bool
