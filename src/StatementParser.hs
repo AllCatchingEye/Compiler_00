@@ -1,14 +1,10 @@
-module StatementParser
-  ( statement )
-where
+module StatementParser (statement) where
 
-import           AExpParser (aExpr)
-import           BExpParser (bExpr)
-import           Lexer
-import           Types
-
-import           Text.ParserCombinators.Parsec
-
+import AExpParser (aExpr)
+import BExpParser (bExpr)
+import Lexer
+import Text.ParserCombinators.Parsec
+import Types
 
 -- Statement → IfStatement `;`
 --           | WhileStatement `;`
@@ -42,44 +38,54 @@ import           Text.ParserCombinators.Parsec
 -- ein Statement geparst oder eine Sequenz, also erst ein Statement und dann
 -- rekursiv wieder ein `statement`.
 statement :: Parser Statement
-statement = 
-  try (do
-    stmnt <- ifStatement
-    _ <- semi
-    statement' stmnt)
-  <|>
-  try (do
-    stmnt <- whileStatement
-    _ <- semi
-    statement' stmnt)
-  <|>
-  try (do
-    stmnt <- skipStatement
-    _ <- semi
-    statement' stmnt)
-  <|>
-  try (do
-    stmnt <- returnStatement
-    _ <- semi
-    statement' stmnt)
-  <|>
-  do
-    stmnt <- assignStatement
-    _ <- semi
-    statement' stmnt
+statement =
+  try
+    ( do
+        _ <- whiteSpace
+        stmnt <- ifStatement
+        _ <- semi
+        statement' stmnt
+    )
+    <|> try
+      ( do
+          _ <- whiteSpace
+          stmnt <- whileStatement
+          _ <- semi
+          statement' stmnt
+      )
+    <|> try
+      ( do
+          _ <- whiteSpace
+          stmnt <- skipStatement
+          _ <- semi
+          statement' stmnt
+      )
+    <|> try
+      ( do
+          _ <- whiteSpace
+          stmnt <- returnStatement
+          _ <- semi
+          statement' stmnt
+      )
+    <|> do
+      _ <- whiteSpace
+      stmnt <- assignStatement
+      _ <- semi
+      statement' stmnt
 
 statement' :: Statement -> Parser Statement
 statement' first =
-  try (do
-    sec <- statement
-    next <- statement' sec
-    pure StmtSeq {first = first, next = next})
-  <|>
-  do
-    pure first
+  try
+    ( do
+        sec <- statement
+        next <- statement' sec
+        pure StmtSeq {first = first, next = next}
+    )
+    <|> do
+      pure first
 
 ifStatement :: Parser Statement
-ifStatement = 
+ifStatement =
   do
     _ <- whiteSpace
     _ <- reserved "if"
@@ -90,7 +96,7 @@ ifStatement =
     pure StmtIf {ifCondition = expr, thenCase = stmt1, elsecase = stmt2}
 
 whileStatement :: Parser Statement
-whileStatement = 
+whileStatement =
   do
     _ <- whiteSpace
     _ <- reserved "while"
@@ -99,7 +105,7 @@ whileStatement =
     pure StmtWhile {loopCondition = expr, loopBody = stm}
 
 skipStatement :: Parser Statement
-skipStatement = 
+skipStatement =
   do
     _ <- whiteSpace
     _ <- reserved "skip"
@@ -110,7 +116,7 @@ returnStatement =
   do
     _ <- whiteSpace
     _ <- reserved "return"
-    expr <- aExpr 
+    expr <- aExpr
     pure StmtReturn {resultValue = expr}
 
 assignStatement :: Parser Statement
