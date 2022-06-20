@@ -1,13 +1,14 @@
 module Interpreter
-  ( interpret
-  , interpretStatement
-  , interpretStmt
-  , interpretAexpr
-  , interpretBexpr)
+  ( interpret,
+    interpretStatement,
+    interpretStmt,
+    interpretAexpr,
+    interpretBexpr,
+  )
 where
 
 import qualified Control.Monad as M (foldM)
-import           Types
+import Types
 
 -- | Diese Funktion interpretiert ein `Program` `p`. Dazu muss zuerst ein
 -- initialer Programmzustand erzeugt werden, in dem ausgehend von
@@ -20,36 +21,40 @@ import           Types
 interpret :: Program -> Either String Integer
 interpret p =
   case initialState of
-    Just i  -> case result (interpretStatement i (statements p)) of
-                   Nothing -> Left "did not see a result value"
-                   Just r  -> Right r
+    Just i -> case result (interpretStatement i (statements p)) of
+      Nothing -> Left "did not see a result value"
+      Just r -> Right r
     Nothing -> Left "cannot build initial program state"
-  where initialState = M.foldM declareVar emptyProgramState (declaration p)
-        -- ^^ wendet `declareVar` beginnend mit dem `emptyProgramState` auf alle
-        --    deklarierten Variablen an und sammelt das Ergebnis in einem `Maybe
-        --    ProgramState` Typ
+  where
+    initialState = M.foldM declareVar emptyProgramState (declaration p)
 
 -- | Diese Funktion prüft ob das `result` des Programmzustands noch den Wert
 -- `Nothing` hat. Wenn ja, wird das `Statement` s ausgeführt, ansonsten der
 -- aktuelle Programmzustand `p` zurückgegeben.
 interpretStatement :: ProgramState -> Statement -> ProgramState
-interpretStatement p s =
-  case result p of
-    Nothing -> interpretStmt p s
-    Just _  -> p
+interpretStatement ps@(ProgramState memory result) s =
+  case result of
+    Nothing -> interpretStmt ps s
+    Just _ -> ps
 
 -- | Diese Funktion macht eine Fallunterscheidung, je nachdem welches der
 -- verschiedenen möglichen Statements übergeben wird. Zum Interpretieren eines
 -- nächsten Statements wird `interpretStatement` aufgerufen, keine direkte
 -- Rekursion.
 interpretStmt :: ProgramState -> Statement -> ProgramState
-interpretStmt = error "interpreter for statement not yet implemented"
-
+interpretStmt ps s =
+  case s of
+    StmtSkip -> _
+    StmtAssign vn ae -> _
+    StmtSeq state state' -> _
+    StmtIf be state state' -> _
+    StmtWhile be state -> _
+    StmtReturn ae -> _
 
 -- | Diese Funktion interpretiert einen logischen Ausdruck.
 interpretBexpr :: ProgramState -> BExpr -> Bool
-interpretBexpr = error "interpreter for Boolean expression not yet implemented"
+interpretBexpr ps b = undefined
 
 -- | Diese Funktion interpretiert einen arithmetischen Ausdruck.
 interpretAexpr :: ProgramState -> AExpr -> Integer
-interpretAexpr = error "interpreter for arithmetic expression not yet imeplemnted"
+interpretAexpr ps a = undefined
