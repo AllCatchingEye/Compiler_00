@@ -42,21 +42,63 @@ interpretStatement ps@(ProgramState memory result) s =
 -- nächsten Statements wird `interpretStatement` aufgerufen, keine direkte
 -- Rekursion.
 interpretStmt :: ProgramState -> Statement -> ProgramState
-interpretStmt ps s =
+interpretStmt ps@(ProgramState memory result) s =
   case s of
     StmtSkip -> ps
-    StmtAssign vn ae -> case updateVar ps vn (interpretAexpr ps ae) of
-      Nothing -> _
-      Just ps' -> _
-    StmtSeq first next -> _
-    StmtIf be th el -> _
-    StmtWhile be state -> _
-    StmtReturn ae -> (interpretAexpr ps ae)
+    StmtAssign vn ae ->
+      case val of
+        Nothing -> ps
+        Just ps' -> ps'
+      where
+        val = updateVar ps vn (interpretAexpr ps ae)
+    StmtIf be th el ->
+      if bool then interpretStatement ps th else interpretStatement ps el
+      where
+        bool = interpretBexpr ps be
+    StmtWhile be state ->
+      if bool then interpretStatement ps state else ps
+      where
+        bool = interpretBexpr ps be
+    StmtReturn ae -> 
+      case val of -- Maybe Integer?
+        Nothing -> ps
+        Just val' -> ProgramState memory val'
+      where
+        val = interpretAexpr ps ae
+    StmtSeq first next -> 
+      case temp of -- Maybe ProgramState?
+        Nothing -> ps
+        Just ps' -> interpretStatement ps' next
+      where 
+        temp = interpretStatement ps first
 
 -- | Diese Funktion interpretiert einen logischen Ausdruck.
 interpretBexpr :: ProgramState -> BExpr -> Bool
-interpretBexpr ps b = undefined
+interpretBexpr ps b = case b of
+  BExprBool bool -> bool
+  BExprNot be -> not (interpretBexpr ps be)
+  BExprLT ae ae' -> interpretAexpr ps ae < interpretAexpr ps ae'
+  BExprLTE ae ae' -> interpretAexpr ps ae <= interpretAexpr ps ae'
+  BExprGT ae ae' -> interpretAexpr ps ae > interpretAexpr ps ae'
+  BExprGTE ae ae' -> interpretAexpr ps ae >= interpretAexpr ps ae'
+  BExprEq ae ae' -> interpretAexpr ps ae == interpretAexpr ps ae'
+  BExprAnd be be' -> interpretBexpr ps be && interpretBexpr ps be'
+  BExprOr be be' -> interpretBexpr ps be|| interpretBexpr ps be'
+  BExprXor be be' -> interpretBexpr ps be /= interpretBexpr ps be'
 
 -- | Diese Funktion interpretiert einen arithmetischen Ausdruck.
 interpretAexpr :: ProgramState -> AExpr -> Integer
-interpretAexpr ps a = undefined
+interpretAexpr ps a = case a of
+  AExprInt n -> n
+  AExprVar vn ->
+    case val of
+      Nothing -> 0 -- Korrekt?
+      Just int -> int
+    where
+      val = varValue ps vn
+  AExprPlus ae ae' -> interpretAexpr ps ae + interpretAexpr ps ae'
+  AExprMinus ae ae' -> interpretAexpr ps ae - interpretAexpr ps ae'
+  AExprMult ae ae' -> interpretAexpr ps ae * interpretAexpr ps ae'
+  AExprDiv ae ae' -> interpretAexpr ps ae / interpretAexpr ps ae'
+  AExprMod ae ae' -> interpretAexpr ps ae `mod` interpretAexpr ps ae'
+
