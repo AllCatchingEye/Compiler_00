@@ -65,12 +65,9 @@ interpretStmt ps@(ProgramState memory result) s =
         Just val' -> ProgramState memory val'
       where
         val = interpretAexpr ps ae
-    StmtSeq first next -> 
-      case temp of -- Maybe ProgramState?
-        Nothing -> ps
-        Just ps' -> interpretStatement ps' next
+    StmtSeq first next -> interpretStatement ps' next
       where 
-        temp = interpretStatement ps first
+        ps' = interpretStatement ps first
 
 -- | Diese Funktion interpretiert einen logischen Ausdruck.
 interpretBexpr :: ProgramState -> BExpr -> Bool
