@@ -59,14 +59,9 @@ interpretStmt ps@(ProgramState memory result) s =
       if bool then interpretStatement ps state else ps
       where
         bool = interpretBexpr ps be
-    StmtReturn ae -> 
-      case val of -- Maybe Integer?
-        Nothing -> ps
-        Just val' -> ProgramState memory val'
-      where
-        val = interpretAexpr ps ae
+    StmtReturn ae -> ProgramState memory (Just (interpretAexpr ps ae))
     StmtSeq first next -> interpretStatement ps' next
-      where 
+      where
         ps' = interpretStatement ps first
 
 -- | Diese Funktion interpretiert einen logischen Ausdruck.
@@ -80,7 +75,7 @@ interpretBexpr ps b = case b of
   BExprGTE ae ae' -> interpretAexpr ps ae >= interpretAexpr ps ae'
   BExprEq ae ae' -> interpretAexpr ps ae == interpretAexpr ps ae'
   BExprAnd be be' -> interpretBexpr ps be && interpretBexpr ps be'
-  BExprOr be be' -> interpretBexpr ps be|| interpretBexpr ps be'
+  BExprOr be be' -> interpretBexpr ps be || interpretBexpr ps be'
   BExprXor be be' -> interpretBexpr ps be /= interpretBexpr ps be'
 
 -- | Diese Funktion interpretiert einen arithmetischen Ausdruck.
@@ -89,13 +84,12 @@ interpretAexpr ps a = case a of
   AExprInt n -> n
   AExprVar vn ->
     case val of
-      Nothing -> 0 -- Korrekt?
+      Nothing -> error ("Variable " ++ show vn ++ "not found") -- Korrekt?
       Just int -> int
     where
       val = varValue ps vn
   AExprPlus ae ae' -> interpretAexpr ps ae + interpretAexpr ps ae'
   AExprMinus ae ae' -> interpretAexpr ps ae - interpretAexpr ps ae'
+  AExprDiv ae ae' -> interpretAexpr ps ae `div` interpretAexpr ps ae'
   AExprMult ae ae' -> interpretAexpr ps ae * interpretAexpr ps ae'
-  AExprDiv ae ae' -> interpretAexpr ps ae / interpretAexpr ps ae'
   AExprMod ae ae' -> interpretAexpr ps ae `mod` interpretAexpr ps ae'
-
