@@ -61,13 +61,11 @@ bExpr' t1 =
   do
     _ <- reservedOp "||"
     t2 <- term
-    expr <- bExpr' t2
-    pure (BExprOr t1 expr)
+    bExpr' (BExprOr t1 t2)
     <|> do
       _ <- reservedOp "^"
       t2 <- term
-      expr <- bExpr' t2
-      pure (BExprXor t1 expr)
+      bExpr' (BExprXor t1 t2)
     <|> do
       pure t1
 
@@ -82,8 +80,7 @@ term' b1 =
   do
     _ <- reservedOp "&&"
     b2 <- boolean
-    expr <- term' b2
-    pure (BExprAnd b1 expr)
+    term' (BExprAnd b1 b2)
     <|> do
       pure b1
 

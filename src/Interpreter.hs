@@ -1,3 +1,6 @@
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+
+{-# HLINT ignore "Replace case with fromMaybe" #-}
 module Interpreter
   ( interpret,
     interpretStatement,
@@ -47,7 +50,7 @@ interpretStmt ps@(ProgramState memory result) s =
     StmtSkip -> ps
     StmtAssign vn ae ->
       case val of
-        Nothing -> ps
+        Nothing -> error "Coudn't assign value"
         Just ps' -> ps'
       where
         val = updateVar ps vn (interpretAexpr ps ae)
@@ -56,10 +59,10 @@ interpretStmt ps@(ProgramState memory result) s =
       where
         bool = interpretBexpr ps be
     StmtWhile be state ->
-      if bool then interpretStatement ps state else ps
+      if bool then interpretStatement (interpretStatement ps state) (StmtWhile be state) else ps
       where
         bool = interpretBexpr ps be
-    StmtReturn ae -> ProgramState memory (Just (interpretAexpr ps ae))
+    StmtReturn ae -> ProgramState (getMemory ps) (Just (interpretAexpr ps ae))
     StmtSeq first next -> interpretStatement ps' next
       where
         ps' = interpretStatement ps first
@@ -84,12 +87,18 @@ interpretAexpr ps a = case a of
   AExprInt n -> n
   AExprVar vn ->
     case val of
-      Nothing -> error ("Variable " ++ show vn ++ "not found") -- Korrekt?
+      Nothing -> error ("Variable " ++ show vn ++ "not found")
       Just int -> int
     where
       val = varValue ps vn
   AExprPlus ae ae' -> interpretAexpr ps ae + interpretAexpr ps ae'
-  AExprMinus ae ae' -> interpretAexpr ps ae - interpretAexpr ps ae'
+  AExprMinus ae ae' ->
+    if negativ (interpretAexpr ps ae')
+      then interpretAexpr ps ae + interpretAexpr ps ae' * (-1)
+      else interpretAexpr ps ae - interpretAexpr ps ae'
   AExprDiv ae ae' -> interpretAexpr ps ae `div` interpretAexpr ps ae'
   AExprMult ae ae' -> interpretAexpr ps ae * interpretAexpr ps ae'
   AExprMod ae ae' -> interpretAexpr ps ae `mod` interpretAexpr ps ae'
+
+negativ :: Integer -> Bool
+negativ i = i < 0
