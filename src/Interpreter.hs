@@ -23,21 +23,20 @@ import Types
 -- `Nothing` ist, dann soll ein `Left` Wert zurückgegeben werden, ansonsten ein
 -- `Right` Wert, der das Ergebnis als `Integer` beinhaltet.
 interpret :: Program -> Either String Integer
-interpret p =
-  case initialState of
-    Just i -> case result (interpretStatement i (statements p)) of
-      Nothing -> Left "did not see a result value"
-      Just r -> Right r
-    Nothing -> Left "cannot build initial program state"
+interpret p = case finalState of
+  Left s -> error s
+  Right x0 -> case x0 of (n, i) -> Right n
   where
-    initialState = M.foldM declareVar emptyProgramState (declaration p)
+    finalState = interpretCount p
 
 interpretCount :: Program -> Either String (Integer, Integer)
 interpretCount p =
   case initialState of
-    Just i -> case result (interpretStatement i (statements p)) of
+    Just i -> case result final_ps of
       Nothing -> Left "did not see a result value"
-      Just r -> Right (r, counter i)
+      Just r -> Right (r, counter final_ps)
+      where
+        final_ps = interpretStatement i (statements p)
     Nothing -> Left "cannot build initial program state"
   where
     initialState = M.foldM declareVar emptyProgramState (declaration p)
