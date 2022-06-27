@@ -40,7 +40,8 @@ import Types
 -- zu berücksichtigen. D.h. `(1 + 2)*3` ist nicht gleich zu `1 + 2 * 3`.
 
 -- | Der Parser für arithmetische Ausdrücke. Dies ist der Einstiegspunkt für das
--- Parsen für Ergebnisse des Typs `AExpr`
+-- Parsen für Ergebnisse des Typs `AExpr`. Anfängliche Whitespaces werden ignoriert,
+-- Vorrang von *, / und % wird hierbei beachtet, + und - werden erst zum schluß geparst.
 aExpr :: Parser AExpr
 aExpr =
   do
@@ -48,6 +49,12 @@ aExpr =
     t <- term
     aExpr' t
 
+-- Parser der + und - parst. Nach einem Rechenoperator kann ein Term geparst werden,
+-- welcher *, / und % parsen kann. Wenn weder + noch - engelesen werden, wird die übergebene AExpr zurückgegeben.
+-- Beispiele:
+-- 5 + 3 -> AExprPlus 5 3
+-- 5 - 3 -> AExprMinus 5 3
+-- 42 -> 42
 aExpr' :: AExpr -> Parser AExpr
 aExpr' t1 =
   do
@@ -61,12 +68,20 @@ aExpr' t1 =
     <|> do
       pure t1
 
+-- Einstiegspunkt um *, / und % zu parsen.
 term :: Parser AExpr
 term =
   do
     f <- factor
     term' f
 
+-- Parst *, / und %. Wird keiner der Operatoren erkannt,
+-- wird die übergebene AExpr wieder zurückgegeben
+-- Beispiele:
+-- 5 * 3 -> AExprMult 5 3
+-- 5 / 3 -> AExprDiv 5 3
+-- 5 % 3 -> AExprMod 5 3
+-- 42 -> 42
 term' :: AExpr -> Parser AExpr
 term' f1 =
   do
@@ -84,6 +99,11 @@ term' f1 =
     <|> do
       pure f1
 
+-- Parst einen Faktor. Ein Faktor kann eine Variable, Nummer und geklammerte AExpr sein.
+-- Beispiele:
+-- a -> AExprVar (Varname a)
+-- 5 -> AExprInt 5
+-- AExpr -> (AExpr)
 factor :: Parser AExpr
 factor =
   do
