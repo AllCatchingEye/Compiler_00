@@ -14,14 +14,6 @@ where
 import qualified Control.Monad as M (foldM)
 import Types
 
--- | Diese Funktion interpretiert ein `Program` `p`. Dazu muss zuerst ein
--- initialer Programmzustand erzeugt werden, in dem ausgehend von
--- `emptyProgramState` alle Variablen von `p` deklariert werden.
---
--- Danach wird `interpretStatement` mit dem Programmzustand und dem `Statement`
--- aus `p` aufgerufen. Wenn danach der Wert von `result` im Prorgrammzustand
--- `Nothing` ist, dann soll ein `Left` Wert zurückgegeben werden, ansonsten ein
--- `Right` Wert, der das Ergebnis als `Integer` beinhaltet.
 interpret :: Program -> Either String Integer
 interpret p = case finalState of
   Left s -> error s
@@ -29,6 +21,14 @@ interpret p = case finalState of
   where
     finalState = interpretCount p
 
+-- | Diese Funktion interpretiert ein `Program` `p`. Dazu muss zuerst ein
+-- initialer Programmzustand erzeugt werden, in dem ausgehend von
+-- `emptyProgramState` alle Variablen von `p` deklariert werden.
+--
+-- Danach wird `interpretStatement` mit dem Programmzustand und dem `Statement`
+-- aus `p` aufgerufen. Wenn danach der Wert von `result` im Prorgrammzustand
+-- `Nothing` ist, dann soll ein `Left` Wert zurückgegeben werden, ansonsten ein
+-- `Right` Wert, der das Ergebnis als `(Integer, Integer)` beinhaltet.
 interpretCount :: Program -> Either String (Integer, Integer)
 interpretCount p =
   case initialState of

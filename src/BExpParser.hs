@@ -49,6 +49,8 @@ import Types
 -- Regeln für den Vorrang beachtet, d.h. erst `&&`, dann `||`/`^`.
 
 -- | Dieser Parser ist der Einstiegspunkt für das Parsen von logischen Ausdrücken.
+-- Der Parser sucht zuerst nach && Ausdrücken, die Vorrangig geparst werden.
+-- Erst danach werden || und ^ geparst.
 bExpr :: Parser BExpr
 bExpr =
   do
@@ -56,6 +58,8 @@ bExpr =
     t <- term
     bExpr' t
 
+-- Parst || und ^. Wird keiner der Operatoren gefunden,
+-- wird die übergebene BExpr zurückgegeben.
 bExpr' :: BExpr -> Parser BExpr
 bExpr' t1 =
   do
@@ -69,12 +73,14 @@ bExpr' t1 =
     <|> do
       pure t1
 
+-- Einstiegspunkt um booleans und Ausdrücke mit && zu parsen.
 term :: Parser BExpr
 term =
   do
     b <- boolean
     term' b
 
+-- Parst BExpr die ein && enthält.
 term' :: BExpr -> Parser BExpr
 term' b1 =
   do
@@ -84,7 +90,14 @@ term' b1 =
     <|> do
       pure b1
 
--- TODO
+-- Parst eine BExpr und gibt einen Boolschen Ausdruck zurück.
+-- Beispiele:
+-- tt -> BExprBool True
+-- ff -> BExprBool False
+-- not BExpr -> BExprNot BExpr
+-- BExpr -> (BExpr)
+-- Wird eine BExpr mit Vergleichsoperatoren gefunden, wird ein
+-- eigener Parser namens cmpExpr dafür aufgerufen.
 boolean :: Parser BExpr
 boolean =
   try
@@ -114,6 +127,13 @@ boolean =
       expr <- cmpExpr
       pure expr
 
+-- Parser der BExpr mit Vergleichsoperatoren parst.
+-- Beispiele:
+-- 5 > 3 -> BExprGT 5 3
+-- 5 >= 5 -> BExprGTE 5 5
+-- 5 < 3 -> BExprLT 5 3
+-- 5 <= 5 -> BExprLTE 5 5
+-- 5 = 5 -> BExprEq 5 5
 cmpExpr :: Parser BExpr
 cmpExpr =
   try
