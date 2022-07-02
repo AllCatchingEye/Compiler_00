@@ -35,18 +35,39 @@ import qualified Text.ParserCombinators.Parsec.Token as Tok
 -- für das keyword "new" schreiben Sie `reserved "new"`
 langDef :: LanguageDef u
 langDef = emptyDef {
-    Tok.identStart = undefined          -- definieren Sie hier einen Parser für
+    Tok.identStart = 
+      do
+        oneOf ['a'..'z']
+      <|>
+      do
+        oneOf ['A'..'Z']         
+                                        -- definieren Sie hier einen Parser für
                                         -- _das_ erste Zeichen eines Bezeichners
 
-  , Tok.identLetter = undefined         -- definieren Sie hier einen Parser für
+  , Tok.identLetter = 
+      do
+        oneOf ['a'..'z']
+        <|>
+      do
+        oneOf ['A'..'Z'] 
+      <|>
+      do
+        oneOf ['0'..'9']
+                                        -- definieren Sie hier einen Parser für
                                         -- _ein_ valides Zeichen eines
                                         -- Bezeichners, das nicht das erste
                                         -- Zeichen ist
 
-  , Tok.reservedNames = undefined       -- definieren Sie hier eine Liste von
+  , Tok.reservedNames = ["decl", "if", "else", "while", "return",
+                         "skip",  "then", "tt", "ff", "not"]       
+                                        -- definieren Sie hier eine Liste von
                                         -- keywords als strings
 
-  , Tok.reservedOpNames = undefined     -- definieren Sie hier eine Liste von
+  , Tok.reservedOpNames = ["+", "-", "*", "/", "%",
+                           "||", "&&", "^", 
+                           ">", "<=", ">", ">=", "=",
+                           ":="]     
+                                        -- definieren Sie hier eine Liste von
                                         -- Operatoren als strings
   }
 

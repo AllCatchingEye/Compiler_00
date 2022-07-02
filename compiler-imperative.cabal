@@ -1,10 +1,10 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.31.2.
+-- This file has been generated from package.yaml by hpack version 0.34.4.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: ec46e2e82a7b046f2c78921e6f481fe7104667a916820060afcd19b291480a35
+-- hash: bea0ea17e0c031d04e9842845e61b131b07102b536af8e11676ea367d2585455
 
 name:           compiler-imperative
 version:        0.1.0.0
@@ -31,6 +31,7 @@ library
       BExpParser
       Interpreter
       Lexer
+      Parse
       ProgramParser
       StatementParser
       Types
